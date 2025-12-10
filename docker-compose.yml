@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: restaurant-postgres
+    environment:
+      POSTGRES_DB: restaurant_db
+      POSTGRES_USER: restaurant_user
+      POSTGRES_PASSWORD: restaurant_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - restaurant-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restaurant_user -d restaurant_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: restaurant-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/restaurant_db
+      SPRING_DATASOURCE_USERNAME: restaurant_user
+      SPRING_DATASOURCE_PASSWORD: restaurant_pass
+    volumes:
+      - ./backend/src:/app/src
+      - maven_cache:/root/.m2
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - restaurant-network
+    restart: unless-stopped
+
+  # Angular Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: restaurant-frontend
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend/src:/app/src
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - restaurant-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  maven_cache:
+
+networks:
+  restaurant-network:
+    driver: bridge
