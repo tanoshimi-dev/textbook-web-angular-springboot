@@ -3,12 +3,11 @@ package com.learning.restaurant.service;
 import com.learning.restaurant.dto.MenuItemDTO;
 import com.learning.restaurant.model.MenuItem;
 import com.learning.restaurant.repository.MenuItemRepository;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,29 +17,38 @@ public class MenuItemService {
 
     @Transactional(readOnly = true)
     public List<MenuItemDTO> getAllMenuItems() {
-        return menuItemRepository.findAll().stream()
+        return menuItemRepository
+            .findAll()
+            .stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<MenuItemDTO> getAvailableMenuItems() {
-        return menuItemRepository.findByAvailable(true).stream()
+        return menuItemRepository
+            .findByAvailable(true)
+            .stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<MenuItemDTO> getMenuItemsByCategory(String category) {
-        return menuItemRepository.findByCategoryAndAvailable(category, true).stream()
+        return menuItemRepository
+            .findByCategoryAndAvailable(category, true)
+            .stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public MenuItemDTO getMenuItemById(Long id) {
-        MenuItem menuItem = menuItemRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + id));
+        MenuItem menuItem = menuItemRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new RuntimeException("Menu item not found with id: " + id)
+            );
         return convertToDTO(menuItem);
     }
 
@@ -53,8 +61,11 @@ public class MenuItemService {
 
     @Transactional
     public MenuItemDTO updateMenuItem(Long id, MenuItemDTO menuItemDTO) {
-        MenuItem existingMenuItem = menuItemRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + id));
+        MenuItem existingMenuItem = menuItemRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new RuntimeException("Menu item not found with id: " + id)
+            );
 
         existingMenuItem.setName(menuItemDTO.getName());
         existingMenuItem.setDescription(menuItemDTO.getDescription());
@@ -96,7 +107,9 @@ public class MenuItemService {
         menuItem.setPrice(dto.getPrice());
         menuItem.setCategory(dto.getCategory());
         menuItem.setImageUrl(dto.getImageUrl());
-        menuItem.setAvailable(dto.getAvailable() != null ? dto.getAvailable() : true);
+        menuItem.setAvailable(
+            dto.getAvailable() != null ? dto.getAvailable() : true
+        );
         menuItem.setPreparationTime(dto.getPreparationTime());
         return menuItem;
     }

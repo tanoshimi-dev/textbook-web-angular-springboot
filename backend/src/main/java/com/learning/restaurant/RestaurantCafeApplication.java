@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class RestaurantCafeApplication {
 
     public static void main(String[] args) {
+        // Hot Reaload Test
+        System.out.println("V8 ☕　Restaurant & Café - Hot Reload Working!");
         SpringApplication.run(RestaurantCafeApplication.class, args);
     }
 }
